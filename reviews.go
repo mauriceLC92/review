@@ -8,22 +8,38 @@ package reviews
 **/
 
 const (
+	// Review schedules
 	MONTHLY = "monthly"
 	WEEKLY  = "weekly"
+
+	// Question types
+	SPLIT  = "split"
+	SINGLE = "single"
 )
 
 type Question struct {
 	Title       string
 	Description string
 	Answer      string
+	Type        string
 }
 
 type Review struct {
-	Id            string
-	CreatedAt     int64  // unix timestamp
-	UpdatedAt     int64  // unix timestamp
-	DateFormatted string // formatted into a utc date
-	Complete      bool
-	Questions     []Question
-	Schedule      string
+	Id        string
+	CreatedAt int64 // unix timestamp
+	UpdatedAt int64 // unix timestamp
+	Complete  bool
+	Questions []Question
+	Schedule  string
+}
+
+func Create(r Review) Review {
+	return Review{
+		Id:        r.Id,
+		CreatedAt: r.CreatedAt,
+		UpdatedAt: r.UpdatedAt,
+		Complete:  false,
+		Questions: r.Questions,
+		Schedule:  r.Schedule,
+	}
 }
