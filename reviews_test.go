@@ -76,51 +76,6 @@ func TestCreateANewReview(t *testing.T) {
 	}
 }
 
-func TestFinishReview(t *testing.T) {
-	t.Parallel()
-
-	want := reviews.Review{
-		ID:        "12",
-		CreatedAt: 1685799475,
-		UpdatedAt: 1685799487,
-		Complete:  true,
-		Questions: reviews.Questions{
-			{
-				Title:       "What were my biggest wins?",
-				Description: "Some description goes here.",
-				Answer:      "Reading 10 pages each day of Atomic Habits",
-				Type:        reviews.SINGLE,
-			},
-		},
-		Schedule: reviews.MONTHLY,
-	}
-
-	myReview := reviews.Review{
-		ID:        "12",
-		CreatedAt: 1685799475,
-		UpdatedAt: 1685799487,
-		Complete:  false,
-		Questions: reviews.Questions{
-			{
-				Title:       "What were my biggest wins?",
-				Description: "Some description goes here.",
-				Answer:      "Reading 10 pages each day of Atomic Habits",
-				Type:        reviews.SINGLE,
-			},
-		},
-		Schedule: reviews.MONTHLY,
-	}
-
-	err := myReview.Finish()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !cmp.Equal(want, myReview) {
-		t.Error(cmp.Diff(want, myReview))
-	}
-}
-
 func TestAllQuestionsCompleteValid(t *testing.T) {
 	t.Parallel()
 
@@ -181,5 +136,68 @@ func TestAllQuestionsCompleteInvalid(t *testing.T) {
 	_, err := questions.AllComplete()
 	if err == nil {
 		t.Fatalf("want error checking all questions complete but got nil")
+	}
+}
+
+func TestFinishReview(t *testing.T) {
+	t.Parallel()
+
+	want := reviews.Review{
+		ID:        "12",
+		CreatedAt: 1685799475,
+		UpdatedAt: 1685799487,
+		Complete:  true,
+		Questions: reviews.Questions{
+			{
+				Title:       "What were my biggest wins?",
+				Description: "Some description goes here.",
+				Answer:      "Reading 10 pages each day of Atomic Habits",
+				Type:        reviews.SINGLE,
+			},
+		},
+		Schedule: reviews.MONTHLY,
+	}
+
+	myReview := reviews.Review{
+		ID:        "12",
+		CreatedAt: 1685799475,
+		UpdatedAt: 1685799487,
+		Complete:  false,
+		Questions: reviews.Questions{
+			{
+				Title:       "What were my biggest wins?",
+				Description: "Some description goes here.",
+				Answer:      "Reading 10 pages each day of Atomic Habits",
+				Type:        reviews.SINGLE,
+			},
+		},
+		Schedule: reviews.MONTHLY,
+	}
+
+	err := myReview.Finish()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !cmp.Equal(want, myReview) {
+		t.Error(cmp.Diff(want, myReview))
+	}
+}
+
+func TestFinishReviewInvalid(t *testing.T) {
+	t.Parallel()
+
+	myReview := reviews.Review{
+		ID:        "12",
+		CreatedAt: 1685799475,
+		UpdatedAt: 1685799487,
+		Complete:  false,
+		Questions: reviews.Questions{},
+		Schedule:  reviews.MONTHLY,
+	}
+
+	err := myReview.Finish()
+	if err == nil {
+		t.Fatalf("want error when finishing a review with no questions but got instead got nil")
 	}
 }

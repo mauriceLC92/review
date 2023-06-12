@@ -52,7 +52,7 @@ type Review struct {
 	CreatedAt int64 // unix timestamp
 	UpdatedAt int64 // unix timestamp
 	Complete  bool
-	Questions []Question
+	Questions Questions
 	Schedule
 }
 
@@ -68,6 +68,13 @@ func Create(r Review) Review {
 }
 
 func (r *Review) Finish() error {
-	// we will a way to check if all questions have been answered
+	questions := r.Questions
+	complete, err := questions.AllComplete()
+	if err != nil {
+		return err
+	}
+	if complete {
+		r.Complete = true
+	}
 	return nil
 }
