@@ -12,7 +12,7 @@ func TestReview(t *testing.T) {
 	t.Parallel()
 	currentDate := time.Now()
 	_ = reviews.Review{
-		Id:        "123",
+		ID:        "123",
 		CreatedAt: currentDate.UnixMilli(),
 		UpdatedAt: currentDate.UnixMilli(),
 		Questions: []reviews.Question{
@@ -21,13 +21,14 @@ func TestReview(t *testing.T) {
 				Description: "A questio to get you thinking",
 			},
 		},
-		Schedule: "Monthly",
+		Schedule: reviews.MONTHLY,
 	}
 }
 
 func TestQuestion(t *testing.T) {
 	t.Parallel()
 	_ = reviews.Question{
+		ID:          "321",
 		Title:       "What were my biggest wins?",
 		Description: "Some description goes here.",
 		Answer:      "",
@@ -39,11 +40,11 @@ func TestCreateANewReview(t *testing.T) {
 	t.Parallel()
 
 	want := reviews.Review{
-		Id:        "12",
+		ID:        "12",
 		CreatedAt: 1685799475,
 		UpdatedAt: 1685799487,
 		Complete:  false,
-		Questions: []reviews.Question{
+		Questions: reviews.Questions{
 			{
 				Title:       "What were my biggest wins?",
 				Description: "Some description goes here.",
@@ -55,10 +56,10 @@ func TestCreateANewReview(t *testing.T) {
 	}
 
 	review := reviews.Review{
-		Id:        "12",
+		ID:        "12",
 		CreatedAt: 1685799475,
 		UpdatedAt: 1685799487,
-		Questions: []reviews.Question{
+		Questions: reviews.Questions{
 			{
 				Title:       "What were my biggest wins?",
 				Description: "Some description goes here.",
@@ -72,5 +73,50 @@ func TestCreateANewReview(t *testing.T) {
 	got := reviews.Create(review)
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func TestFinishReview(t *testing.T) {
+	t.Parallel()
+
+	want := reviews.Review{
+		ID:        "12",
+		CreatedAt: 1685799475,
+		UpdatedAt: 1685799487,
+		Complete:  true,
+		Questions: reviews.Questions{
+			{
+				Title:       "What were my biggest wins?",
+				Description: "Some description goes here.",
+				Answer:      "Reading 10 pages each day of Atomic Habits",
+				Type:        reviews.SINGLE,
+			},
+		},
+		Schedule: reviews.MONTHLY,
+	}
+
+	myReview := reviews.Review{
+		ID:        "12",
+		CreatedAt: 1685799475,
+		UpdatedAt: 1685799487,
+		Complete:  false,
+		Questions: reviews.Questions{
+			{
+				Title:       "What were my biggest wins?",
+				Description: "Some description goes here.",
+				Answer:      "Reading 10 pages each day of Atomic Habits",
+				Type:        reviews.SINGLE,
+			},
+		},
+		Schedule: reviews.MONTHLY,
+	}
+
+	err := myReview.Finish()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !cmp.Equal(want, myReview) {
+		t.Error(cmp.Diff(want, myReview))
 	}
 }
