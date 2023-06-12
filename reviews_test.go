@@ -120,3 +120,66 @@ func TestFinishReview(t *testing.T) {
 		t.Error(cmp.Diff(want, myReview))
 	}
 }
+
+func TestAllQuestionsCompleteValid(t *testing.T) {
+	t.Parallel()
+
+	questions := reviews.Questions{
+		{
+			Title:       "What were my biggest wins?",
+			Description: "Some description goes here.",
+			Answer:      "Reading 10 pages each day of Atomic Habits",
+			Type:        reviews.SINGLE,
+		},
+		{
+			Title:       "What had the most impact on my month?",
+			Description: "Some description goes here.",
+			Answer:      "Reading 10 everday",
+			Type:        reviews.SINGLE,
+		},
+	}
+	want := true
+
+	got, err := questions.AllComplete()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if want != got {
+		t.Errorf("wanted %v but got %v", want, got)
+	}
+
+	questions = reviews.Questions{
+		{
+			Title:       "What were my biggest wins?",
+			Description: "Some description goes here.",
+			Answer:      "",
+			Type:        reviews.SINGLE,
+		},
+		{
+			Title:       "What had the most impact on my month?",
+			Description: "Some description goes here.",
+			Answer:      "Reading 10 everday",
+			Type:        reviews.SINGLE,
+		},
+	}
+	want = false
+	got, err = questions.AllComplete()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if want != got {
+		t.Errorf("wanted %v but got %v", want, got)
+	}
+}
+
+func TestAllQuestionsCompleteInvalid(t *testing.T) {
+	t.Parallel()
+	questions := reviews.Questions{}
+
+	_, err := questions.AllComplete()
+	if err == nil {
+		t.Fatalf("want error checking all questions complete but got nil")
+	}
+}

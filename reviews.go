@@ -1,5 +1,7 @@
 package reviews
 
+import "errors"
+
 /**
 	1. As a user I would like to create a review to review on a pre-determined schedule. Monthly, weekly is fine for now
 	2. As a user I should be able to complete a review
@@ -29,6 +31,19 @@ type Question struct {
 }
 
 type Questions []Question
+
+func (qs Questions) AllComplete() (bool, error) {
+	if len(qs) == 0 {
+		return false, errors.New("no questions provided")
+	}
+	var complete = true
+	for _, q := range qs {
+		if q.Answer == "" {
+			complete = false
+		}
+	}
+	return complete, nil
+}
 
 type Schedule string
 
