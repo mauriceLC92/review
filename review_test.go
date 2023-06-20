@@ -2,7 +2,6 @@ package review_test
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -226,9 +225,42 @@ func TestAskPrintsGivenQuestionAndReturnsAnswer(t *testing.T) {
 	}
 }
 
-func TestDueChecksDueDateAndReturns(t *testing.T) {
+func TestMyReview(t *testing.T) {
+	t.Parallel()
+	currentDate := time.Now()
+	_ = review.MyReview{
+		CreatedAt: currentDate,
+	}
+}
+
+func TestDueChecksDueDateAndReturnsTrueIfDue(t *testing.T) {
+	t.Parallel()
+
+	myTime, _ := time.Parse(review.DAY_MONTH_YEAR_FORMAT, "20-05-2023")
+	myReview := review.MyReview{
+		CreatedAt: myTime,
+	}
+
+	want := true
+	got := myReview.Due()
+
+	if want != got {
+		t.Errorf("Wanted %v but got %v", want, got)
+	}
+}
+
+func TestDueChecksDueDateAndReturnsFalseIfNotDue(t *testing.T) {
 	t.Parallel()
 
 	myTime, _ := time.Parse(review.DAY_MONTH_YEAR_FORMAT, "20-06-2023")
-	fmt.Println(myTime.UnixMilli())
+	myReview := review.MyReview{
+		CreatedAt: myTime,
+	}
+
+	want := false
+	got := myReview.Due()
+
+	if want != got {
+		t.Errorf("Wanted %v but got %v", want, got)
+	}
 }

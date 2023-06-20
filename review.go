@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"time"
 )
 
 /**
@@ -92,4 +93,14 @@ func AskTo(w io.Writer, r io.Reader, question string) string {
 	var scanner = bufio.NewScanner(r)
 	scanner.Scan()
 	return scanner.Text()
+}
+
+type MyReview struct {
+	CreatedAt time.Time
+}
+
+func (mr MyReview) Due() bool {
+	currentTime := time.Now()
+	oneMonthLater := mr.CreatedAt.AddDate(0, 1, 0)
+	return currentTime.After(oneMonthLater)
 }
