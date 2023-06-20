@@ -23,6 +23,8 @@ const (
 	// Question types
 	// SPLIT  QuestionType = "split"
 	SINGLE QuestionType = "single"
+
+	DAY_MONTH_YEAR_FORMAT string = "02-01-2006"
 )
 
 type QuestionType string

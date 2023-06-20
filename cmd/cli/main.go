@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/mauriceLC92/review"
 )
@@ -16,6 +17,10 @@ func main() {
 		switch strings.ToLower(os.Args[1]) {
 		case "ask":
 			askQuestions(questions)
+		case "time":
+			const formatString = "02-01-2006"
+			myTime, _ := time.Parse(formatString, "20-06-2023")
+			fmt.Println(myTime.UnixMilli())
 		default:
 			fmt.Println("command not recognised")
 		}

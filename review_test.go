@@ -2,6 +2,7 @@ package review_test
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -225,8 +226,9 @@ func TestAskPrintsGivenQuestionAndReturnsAnswer(t *testing.T) {
 	}
 }
 
-func TestDueChecksDueDateAndReturnsIfDueOrNot(t *testing.T) {
+func TestDueChecksDueDateAndReturns(t *testing.T) {
 	t.Parallel()
 
-	// date := time.Date(2023, time.April, 20)
+	myTime, _ := time.Parse(review.DAY_MONTH_YEAR_FORMAT, "20-06-2023")
+	fmt.Println(myTime.UnixMilli())
 }
