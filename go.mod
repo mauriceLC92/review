@@ -1,4 +1,4 @@
-module github.com/mauriceLC92/reviews
+module github.com/mauriceLC92/review
 
 go 1.20
 

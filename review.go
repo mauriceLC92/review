@@ -1,6 +1,11 @@
-package reviews
+package review
 
-import "errors"
+import (
+	"bufio"
+	"errors"
+	"fmt"
+	"io"
+)
 
 /**
 	1. As a user I would like to create a review to review on a pre-determined schedule. Monthly, weekly is fine for now
@@ -56,6 +61,7 @@ type Review struct {
 	Schedule
 }
 
+// review create
 func Create(r Review) Review {
 	return Review{
 		ID:        r.ID,
@@ -77,4 +83,11 @@ func (r *Review) Finish() error {
 		r.Complete = true
 	}
 	return nil
+}
+
+func AskTo(w io.Writer, r io.Reader, question string) string {
+	fmt.Fprint(w, question)
+	var scanner = bufio.NewScanner(r)
+	scanner.Scan()
+	return scanner.Text()
 }

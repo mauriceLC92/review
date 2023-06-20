@@ -1,76 +1,78 @@
-package reviews_test
+package review_test
 
 import (
+	"bytes"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/mauriceLC92/reviews"
+	"github.com/mauriceLC92/review"
 )
 
 func TestReview(t *testing.T) {
 	t.Parallel()
 	currentDate := time.Now()
-	_ = reviews.Review{
+	_ = review.Review{
 		ID:        "123",
 		CreatedAt: currentDate.UnixMilli(),
 		UpdatedAt: currentDate.UnixMilli(),
-		Questions: []reviews.Question{
+		Questions: []review.Question{
 			{
 				Title:       "What were my biggest wins?",
 				Description: "A questio to get you thinking",
 			},
 		},
-		Schedule: reviews.MONTHLY,
+		Schedule: review.MONTHLY,
 	}
 }
 
 func TestQuestion(t *testing.T) {
 	t.Parallel()
-	_ = reviews.Question{
+	_ = review.Question{
 		ID:          "321",
 		Title:       "What were my biggest wins?",
 		Description: "Some description goes here.",
 		Answer:      "",
-		Type:        reviews.SINGLE,
+		Type:        review.SINGLE,
 	}
 }
 
 func TestCreateANewReview(t *testing.T) {
 	t.Parallel()
 
-	want := reviews.Review{
+	want := review.Review{
 		ID:        "12",
 		CreatedAt: 1685799475,
 		UpdatedAt: 1685799487,
 		Complete:  false,
-		Questions: reviews.Questions{
+		Questions: review.Questions{
 			{
 				Title:       "What were my biggest wins?",
 				Description: "Some description goes here.",
 				Answer:      "",
-				Type:        reviews.SINGLE,
+				Type:        review.SINGLE,
 			},
 		},
-		Schedule: reviews.MONTHLY,
+		Schedule: review.MONTHLY,
 	}
 
-	review := reviews.Review{
+	rev := review.Review{
 		ID:        "12",
 		CreatedAt: 1685799475,
 		UpdatedAt: 1685799487,
-		Questions: reviews.Questions{
+		Questions: review.Questions{
 			{
 				Title:       "What were my biggest wins?",
 				Description: "Some description goes here.",
 				Answer:      "",
-				Type:        reviews.SINGLE,
+				Type:        review.SINGLE,
 			},
 		},
-		Schedule: reviews.MONTHLY,
+		Schedule: review.MONTHLY,
 	}
 
-	got := reviews.Create(review)
+	got := review.Create(rev)
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
 	}
@@ -79,18 +81,18 @@ func TestCreateANewReview(t *testing.T) {
 func TestAllQuestionsCompleteValid(t *testing.T) {
 	t.Parallel()
 
-	questions := reviews.Questions{
+	questions := review.Questions{
 		{
 			Title:       "What were my biggest wins?",
 			Description: "Some description goes here.",
 			Answer:      "Reading 10 pages each day of Atomic Habits",
-			Type:        reviews.SINGLE,
+			Type:        review.SINGLE,
 		},
 		{
 			Title:       "What had the most impact on my month?",
 			Description: "Some description goes here.",
 			Answer:      "Reading 10 everday",
-			Type:        reviews.SINGLE,
+			Type:        review.SINGLE,
 		},
 	}
 	want := true
@@ -104,18 +106,18 @@ func TestAllQuestionsCompleteValid(t *testing.T) {
 		t.Errorf("wanted %v but got %v", want, got)
 	}
 
-	questions = reviews.Questions{
+	questions = review.Questions{
 		{
 			Title:       "What were my biggest wins?",
 			Description: "Some description goes here.",
 			Answer:      "",
-			Type:        reviews.SINGLE,
+			Type:        review.SINGLE,
 		},
 		{
 			Title:       "What had the most impact on my month?",
 			Description: "Some description goes here.",
 			Answer:      "Reading 10 everday",
-			Type:        reviews.SINGLE,
+			Type:        review.SINGLE,
 		},
 	}
 	want = false
@@ -131,7 +133,7 @@ func TestAllQuestionsCompleteValid(t *testing.T) {
 
 func TestAllQuestionsCompleteInvalid(t *testing.T) {
 	t.Parallel()
-	questions := reviews.Questions{}
+	questions := review.Questions{}
 
 	_, err := questions.AllComplete()
 	if err == nil {
@@ -142,36 +144,36 @@ func TestAllQuestionsCompleteInvalid(t *testing.T) {
 func TestFinishReview(t *testing.T) {
 	t.Parallel()
 
-	want := reviews.Review{
+	want := review.Review{
 		ID:        "12",
 		CreatedAt: 1685799475,
 		UpdatedAt: 1685799487,
 		Complete:  true,
-		Questions: reviews.Questions{
+		Questions: review.Questions{
 			{
 				Title:       "What were my biggest wins?",
 				Description: "Some description goes here.",
 				Answer:      "Reading 10 pages each day of Atomic Habits",
-				Type:        reviews.SINGLE,
+				Type:        review.SINGLE,
 			},
 		},
-		Schedule: reviews.MONTHLY,
+		Schedule: review.MONTHLY,
 	}
 
-	myReview := reviews.Review{
+	myReview := review.Review{
 		ID:        "12",
 		CreatedAt: 1685799475,
 		UpdatedAt: 1685799487,
 		Complete:  false,
-		Questions: reviews.Questions{
+		Questions: review.Questions{
 			{
 				Title:       "What were my biggest wins?",
 				Description: "Some description goes here.",
 				Answer:      "Reading 10 pages each day of Atomic Habits",
-				Type:        reviews.SINGLE,
+				Type:        review.SINGLE,
 			},
 		},
-		Schedule: reviews.MONTHLY,
+		Schedule: review.MONTHLY,
 	}
 
 	err := myReview.Finish()
@@ -187,17 +189,44 @@ func TestFinishReview(t *testing.T) {
 func TestFinishReviewInvalid(t *testing.T) {
 	t.Parallel()
 
-	myReview := reviews.Review{
+	myReview := review.Review{
 		ID:        "12",
 		CreatedAt: 1685799475,
 		UpdatedAt: 1685799487,
 		Complete:  false,
-		Questions: reviews.Questions{},
-		Schedule:  reviews.MONTHLY,
+		Questions: review.Questions{},
+		Schedule:  review.MONTHLY,
 	}
 
 	err := myReview.Finish()
 	if err == nil {
 		t.Fatalf("want error when finishing a review with no questions but got instead got nil")
 	}
+}
+
+func TestAskPrintsGivenQuestionAndReturnsAnswer(t *testing.T) {
+	t.Parallel()
+
+	buf := new(bytes.Buffer)
+
+	question := "What were your biggest wins?"
+	userInputStr := "Spent 10 minutes programming in Go"
+	userInput := strings.NewReader(userInputStr)
+
+	got := review.AskTo(buf, userInput, question)
+
+	bufString := buf.String()
+	if bufString != question {
+		t.Errorf("Wanted %s but got %s", question, bufString)
+	}
+
+	if userInputStr != got {
+		t.Errorf("Wanted %s but got %v", userInputStr, got)
+	}
+}
+
+func TestDueChecksDueDateAndReturnsIfDueOrNot(t *testing.T) {
+	t.Parallel()
+
+	// date := time.Date(2023, time.April, 20)
 }
