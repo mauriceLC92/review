@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"time"
 )
 
@@ -88,6 +89,8 @@ func (r *Review) Finish() error {
 	return nil
 }
 
+// ---------------------------------------------------------------------------
+
 func AskTo(w io.Writer, r io.Reader, question string) string {
 	fmt.Fprint(w, question)
 	var scanner = bufio.NewScanner(r)
@@ -99,8 +102,19 @@ type MyReview struct {
 	CreatedAt time.Time
 }
 
-func (mr MyReview) Due() bool {
+func (mr MyReview) Due() (bool, time.Time) {
 	currentTime := time.Now()
 	oneMonthLater := mr.CreatedAt.AddDate(0, 1, 0)
-	return currentTime.After(oneMonthLater)
+	return currentTime.After(oneMonthLater), oneMonthLater
+}
+
+// Check will check if any review has been done and if so, will return
+// the lastest review
+func Check(reviews []MyReview) (MyReview, bool) {
+	if len(reviews) == 0 {
+		return MyReview{}, false
+	}
+	sort.Slice(reviews, func(i, j int) bool { return reviews[i].CreatedAt.Unix() > reviews[j].CreatedAt.Unix() })
+	latestReview := reviews[0]
+	return latestReview, true
 }

@@ -236,31 +236,80 @@ func TestMyReview(t *testing.T) {
 func TestDueChecksDueDateAndReturnsTrueIfDue(t *testing.T) {
 	t.Parallel()
 
-	myTime, _ := time.Parse(review.DAY_MONTH_YEAR_FORMAT, "20-05-2023")
+	testDate := "20-05-2023"
+	myTime, _ := time.Parse(review.DAY_MONTH_YEAR_FORMAT, testDate)
 	myReview := review.MyReview{
 		CreatedAt: myTime,
 	}
 
-	want := true
-	got := myReview.Due()
+	wantDue := true
+	wantDate := myTime.AddDate(0, 1, 0)
+	gotDue, gotDate := myReview.Due()
 
-	if want != got {
-		t.Errorf("Wanted %v but got %v", want, got)
+	if wantDue != gotDue {
+		t.Errorf("wanted %v but got %v", wantDue, gotDue)
+	}
+	if wantDate != gotDate {
+		t.Errorf("wanted %v but got %v", wantDate, gotDate)
 	}
 }
 
 func TestDueChecksDueDateAndReturnsFalseIfNotDue(t *testing.T) {
 	t.Parallel()
 
-	myTime, _ := time.Parse(review.DAY_MONTH_YEAR_FORMAT, "20-06-2023")
+	testDate := "20-06-2025"
+	myTime, _ := time.Parse(review.DAY_MONTH_YEAR_FORMAT, testDate)
 	myReview := review.MyReview{
 		CreatedAt: myTime,
 	}
 
-	want := false
-	got := myReview.Due()
+	wantDue := false
+	wantDate := myTime.AddDate(0, 1, 0)
+	gotDue, gotDate := myReview.Due()
 
-	if want != got {
-		t.Errorf("Wanted %v but got %v", want, got)
+	if wantDue != gotDue {
+		t.Errorf("wanted %v but got %v", wantDue, gotDue)
+	}
+	if wantDate != gotDate {
+		t.Errorf("wanted %v but got %v", wantDate, gotDate)
+	}
+}
+
+func TestCheckDeterminesIfNoReviewsHaveTakenPlace(t *testing.T) {
+	t.Parallel()
+
+	reviews := []review.MyReview{}
+
+	want := review.MyReview{}
+	got, ok := review.Check(reviews)
+
+	if ok != false {
+		t.Error("expected false when no review has been done but got 'true'")
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func TestCheckDeterminesIfAReviewHasTakenPlaceAndReturnsLatestReview(t *testing.T) {
+	t.Parallel()
+
+	reviews := []review.MyReview{
+		{CreatedAt: time.Date(2025, time.June, 20, 0, 0, 0, 0, time.UTC)},
+		{CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC)},
+		{CreatedAt: time.Date(2025, time.July, 20, 0, 0, 0, 0, time.UTC)},
+	}
+	want := review.MyReview{
+		CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC),
+	}
+	got, ok := review.Check(reviews)
+
+	if ok != true {
+		t.Error("expected 'true' when a review has taken place but got 'false'")
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
 	}
 }
