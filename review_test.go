@@ -313,3 +313,40 @@ func TestCheckDeterminesIfAReviewHasTakenPlaceAndReturnsLatestReview(t *testing.
 		t.Error(cmp.Diff(want, got))
 	}
 }
+
+func TestParseReadsJSONFileOfReviewsAndReturnsASliceOfReviews(t *testing.T) {
+	t.Parallel()
+
+	wantedReviews := []review.MyReview{
+		{CreatedAt: time.Date(2025, time.June, 20, 0, 0, 0, 0, time.UTC)},
+		{CreatedAt: time.Date(2025, time.July, 20, 0, 0, 0, 0, time.UTC)},
+		{CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC)},
+	}
+
+	got, err := review.Parse("testdata/reviews-non-empty.json")
+	if err != nil {
+		t.Fatal("error parsing file", err)
+	}
+
+	if !cmp.Equal(got, wantedReviews) {
+		t.Error(cmp.Diff(wantedReviews, got))
+	}
+}
+
+func TestParseReadsJSONFileOfReviewsAndErrorsWhenFileNotFound(t *testing.T) {
+	t.Parallel()
+
+	_, err := review.Parse("nowheretobefound/reviews-non-empty.json")
+	if err == nil {
+		t.Fatal("expected error reading a file that does not exist but got nil instead")
+	}
+}
+
+func TestParseReadsJSONFileOfReviewsAndErrorsParsingInvalidJSON(t *testing.T) {
+	t.Parallel()
+
+	_, err := review.Parse("testdata/reviews-invalid.json")
+	if err == nil {
+		t.Fatal("expected error reading a file with invalid JSON but got nil instead", err)
+	}
+}

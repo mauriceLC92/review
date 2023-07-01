@@ -2,9 +2,11 @@ package review
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"sort"
 	"time"
 )
@@ -99,7 +101,46 @@ func AskTo(w io.Writer, r io.Reader, question string) string {
 }
 
 type MyReview struct {
-	CreatedAt time.Time
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+// The overall effect of this method is that it allows the createdAt field in the JSON data, which is in the format "day-month-year",
+// to be correctly parsed into a time.Time value in the MyReview structure.
+// chatGPT generated example for being able to unmarshall custom date formats from JSON
+func (mr *MyReview) UnmarshalJSON(input []byte) error {
+	type Alias MyReview
+	aux := &struct {
+		CreatedAt string `json:"createdAt"`
+		*Alias
+	}{
+		Alias: (*Alias)(mr),
+	}
+	if err := json.Unmarshal(input, &aux); err != nil {
+		return err
+	}
+	t, err := time.Parse(DAY_MONTH_YEAR_FORMAT, aux.CreatedAt)
+	if err != nil {
+		return err
+	}
+	mr.CreatedAt = t
+	return nil
+}
+
+// MarshalJSON is similar to UnmarshalJSON in that it helps format the time into the desired
+// format we want used in the JSON.
+func (mr *MyReview) MarshalJSON() ([]byte, error) {
+	// Format the CreatedAt field as a string in the desired format.
+	formattedDate := mr.CreatedAt.Format(DAY_MONTH_YEAR_FORMAT)
+
+	// Create a new struct that has the same fields as MyReview but with CreatedAt as a string.
+	aux := &struct {
+		CreatedAt string `json:"createdAt"`
+	}{
+		CreatedAt: formattedDate,
+	}
+
+	// Marshal the auxiliary struct into JSON.
+	return json.Marshal(aux)
 }
 
 func (mr MyReview) Due() (bool, time.Time) {
@@ -117,4 +158,16 @@ func Check(reviews []MyReview) (MyReview, bool) {
 	sort.Slice(reviews, func(i, j int) bool { return reviews[i].CreatedAt.Unix() > reviews[j].CreatedAt.Unix() })
 	latestReview := reviews[0]
 	return latestReview, true
+}
+
+func Parse(path string) ([]MyReview, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return []MyReview{}, err
+	}
+	reviews := []MyReview{}
+	if err := json.Unmarshal(data, &reviews); err != nil {
+		return []MyReview{}, err
+	}
+	return reviews, nil
 }

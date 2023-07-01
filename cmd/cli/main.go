@@ -16,6 +16,8 @@ func main() {
 		switch strings.ToLower(os.Args[1]) {
 		case "ask":
 			askQuestions(questions)
+		case "review":
+			runReview()
 		default:
 			fmt.Println("command not recognised")
 		}
@@ -31,4 +33,20 @@ func askQuestions(questions []string) {
 		ans := review.AskTo(os.Stdout, os.Stdin, fmt.Sprintln(q))
 		fmt.Println(ans)
 	}
+}
+
+func runReview() {
+	reviews, err := review.Parse("reviews.json")
+	if err != nil {
+		fmt.Println("error opening file of reviews", err)
+	}
+
+	_, ok := review.Check(reviews)
+	if !ok {
+		fmt.Println("You have not done a review yet! Let's get you started")
+		// Call function to ask the initial questions
+	}
+
+	// check if the review is due
+
 }
