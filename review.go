@@ -100,8 +100,14 @@ func AskTo(w io.Writer, r io.Reader, question string) string {
 	return scanner.Text()
 }
 
+type MyQuestion struct {
+	Title  string `json:"title"`
+	Answer string `json:"answer"`
+}
+
 type MyReview struct {
-	CreatedAt time.Time `json:"createdAt"`
+	CreatedAt time.Time    `json:"createdAt"`
+	Questions []MyQuestion `json:"questions"`
 }
 
 // The overall effect of this method is that it allows the createdAt field in the JSON data, which is in the format "day-month-year",
@@ -188,4 +194,11 @@ func Parse(path string) ([]MyReview, error) {
 		return []MyReview{}, err
 	}
 	return reviews, nil
+}
+
+func (mr *MyReview) Review(w io.Writer, r io.Reader) {
+	for i, q := range mr.Questions {
+		ans := AskTo(w, r, q.Title)
+		mr.Questions[i].Answer = ans
+	}
 }

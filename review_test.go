@@ -360,11 +360,27 @@ func TestParseReadsJSONFileOfReviewsAndErrorsParsingInvalidJSON(t *testing.T) {
 	}
 }
 
-// func TestReviewAsksQuestionsAndGetsAnswers(t *testing.T) {
+func TestReviewAsksQuestionsAndGetsAnswers(t *testing.T) {
+	t.Parallel()
+	buf := new(bytes.Buffer)
+	r := &review.MyReview{
+		CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC),
+		Questions: []review.MyQuestion{
+			{Title: "What could you have done better last month?", Answer: ""},
+		},
+	}
 
-// 	review := &review.MyReview{
-// 		CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC),
-// 	}
+	userAnswer := "Read 100 more pages of AWS Fundamentals"
+	wantedReview := review.MyReview{
+		CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC),
+		Questions: []review.MyQuestion{
+			{Title: "What could you have done better last month?", Answer: userAnswer},
+		},
+	}
 
-// 	review.Review()
-// }
+	r.Review(buf, strings.NewReader(userAnswer))
+	rev := *r
+	if !cmp.Equal(rev, wantedReview) {
+		t.Error(cmp.Diff(wantedReview, r))
+	}
+}
