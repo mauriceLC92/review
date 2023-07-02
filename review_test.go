@@ -243,14 +243,10 @@ func TestDueChecksDueDateAndReturnsTrueIfDue(t *testing.T) {
 	}
 
 	wantDue := true
-	wantDate := myTime.AddDate(0, 1, 0)
-	gotDue, gotDate := myReview.Due()
+	gotDue := myReview.Due()
 
 	if wantDue != gotDue {
 		t.Errorf("wanted %v but got %v", wantDue, gotDue)
-	}
-	if wantDate != gotDate {
-		t.Errorf("wanted %v but got %v", wantDate, gotDate)
 	}
 }
 
@@ -264,12 +260,25 @@ func TestDueChecksDueDateAndReturnsFalseIfNotDue(t *testing.T) {
 	}
 
 	wantDue := false
-	wantDate := myTime.AddDate(0, 1, 0)
-	gotDue, gotDate := myReview.Due()
+	gotDue := myReview.Due()
 
 	if wantDue != gotDue {
 		t.Errorf("wanted %v but got %v", wantDue, gotDue)
 	}
+}
+
+func TestNextDueDateReturnsTheNextDueDate(t *testing.T) {
+	t.Parallel()
+
+	testDate := "20-05-2023"
+	myTime, _ := time.Parse(review.DAY_MONTH_YEAR_FORMAT, testDate)
+	myReview := review.MyReview{
+		CreatedAt: myTime,
+	}
+
+	wantDate := myTime.AddDate(0, 1, 0)
+	gotDate := myReview.NextDueDate()
+
 	if wantDate != gotDate {
 		t.Errorf("wanted %v but got %v", wantDate, gotDate)
 	}
@@ -350,3 +359,12 @@ func TestParseReadsJSONFileOfReviewsAndErrorsParsingInvalidJSON(t *testing.T) {
 		t.Fatal("expected error reading a file with invalid JSON but got nil instead", err)
 	}
 }
+
+// func TestReviewAsksQuestionsAndGetsAnswers(t *testing.T) {
+
+// 	review := &review.MyReview{
+// 		CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC),
+// 	}
+
+// 	review.Review()
+// }

@@ -143,10 +143,14 @@ func (mr *MyReview) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 }
 
-func (mr MyReview) Due() (bool, time.Time) {
+func (mr MyReview) Due() bool {
 	currentTime := time.Now()
 	oneMonthLater := mr.CreatedAt.AddDate(0, 1, 0)
-	return currentTime.After(oneMonthLater), oneMonthLater
+	return currentTime.After(oneMonthLater)
+}
+
+func (mr MyReview) NextDueDate() time.Time {
+	return mr.CreatedAt.AddDate(0, 1, 0)
 }
 
 // Check will check if any review has been done and if so, will return
@@ -154,6 +158,20 @@ func (mr MyReview) Due() (bool, time.Time) {
 func Check(reviews []MyReview) (MyReview, bool) {
 	if len(reviews) == 0 {
 		return MyReview{}, false
+	}
+	sort.Slice(reviews, func(i, j int) bool { return reviews[i].CreatedAt.Unix() > reviews[j].CreatedAt.Unix() })
+	latestReview := reviews[0]
+	return latestReview, true
+}
+
+// Check will determine if any reviews have been done and if so return the latest review. If not, Check
+// will return a review that is due.
+func CheckV2(reviews []MyReview) (MyReview, bool) {
+	if len(reviews) == 0 {
+		validDueDate := time.Now().AddDate(0, -1, 0)
+		return MyReview{
+			CreatedAt: validDueDate,
+		}, false
 	}
 	sort.Slice(reviews, func(i, j int) bool { return reviews[i].CreatedAt.Unix() > reviews[j].CreatedAt.Unix() })
 	latestReview := reviews[0]
