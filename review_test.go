@@ -267,6 +267,36 @@ func TestDueChecksDueDateAndReturnsFalseIfNotDue(t *testing.T) {
 	}
 }
 
+func TestCreatedTodayChecksIfAReviewWasCreatedTodayAndReturnsTrue(t *testing.T) {
+	t.Parallel()
+
+	r := review.MyReview{
+		CreatedAt: time.Now(),
+	}
+
+	want := true
+	got := r.CreatedToday()
+
+	if want != got {
+		t.Errorf("wanted %v but got %v", want, got)
+	}
+}
+
+func TestCreatedTodayChecksIfAReviewWasCreatedTodayAndReturnsFalse(t *testing.T) {
+	t.Parallel()
+
+	r := review.MyReview{
+		CreatedAt: time.Now().AddDate(5, 0, 1),
+	}
+
+	want := false
+	got := r.CreatedToday()
+
+	if want != got {
+		t.Errorf("wanted %v but got %v", want, got)
+	}
+}
+
 func TestNextDueDateReturnsTheNextDueDate(t *testing.T) {
 	t.Parallel()
 

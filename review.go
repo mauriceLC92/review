@@ -155,6 +155,14 @@ func (mr MyReview) Due() bool {
 	return currentTime.After(oneMonthLater)
 }
 
+func (mr MyReview) CreatedToday() bool {
+	currentTime := time.Now()
+	sameMonth := currentTime.Month() == mr.CreatedAt.Month()
+	sameDay := currentTime.Day() == mr.CreatedAt.Day()
+	sameYear := currentTime.Year() == mr.CreatedAt.Year()
+	return sameYear && sameDay && sameMonth
+}
+
 func (mr MyReview) NextDueDate() time.Time {
 	return mr.CreatedAt.AddDate(0, 1, 0)
 }
@@ -165,21 +173,7 @@ func Check(reviews []MyReview) (MyReview, bool) {
 	if len(reviews) == 0 {
 		return MyReview{}, false
 	}
-	sort.Slice(reviews, func(i, j int) bool { return reviews[i].CreatedAt.Unix() > reviews[j].CreatedAt.Unix() })
-	latestReview := reviews[0]
-	return latestReview, true
-}
-
-// Check will determine if any reviews have been done and if so return the latest review. If not, Check
-// will return a review that is due.
-func CheckV2(reviews []MyReview) (MyReview, bool) {
-	if len(reviews) == 0 {
-		validDueDate := time.Now().AddDate(0, -1, 0)
-		return MyReview{
-			CreatedAt: validDueDate,
-		}, false
-	}
-	sort.Slice(reviews, func(i, j int) bool { return reviews[i].CreatedAt.Unix() > reviews[j].CreatedAt.Unix() })
+	sort.Slice(reviews, func(i, j int) bool { return reviews[i].CreatedAt.After(reviews[j].CreatedAt) })
 	latestReview := reviews[0]
 	return latestReview, true
 }

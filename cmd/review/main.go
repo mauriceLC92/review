@@ -44,9 +44,8 @@ func runReview() {
 	r, ok := review.CheckV2(reviews)
 	if !ok {
 		fmt.Println("You have not done a review yet! Let's get you started")
-		// Call function to ask the initial questions
 	}
-	if r.Due() {
+	if r.Due() || r.CreatedToday() {
 		fmt.Println("is due :)")
 		// r.Review()
 	} else {
