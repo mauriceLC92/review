@@ -41,13 +41,13 @@ func runReview() {
 		fmt.Println("error opening file of reviews", err)
 	}
 
-	r, ok := review.CheckV2(reviews)
+	r, ok := review.Check(reviews)
 	if !ok {
 		fmt.Println("You have not done a review yet! Let's get you started")
 	}
 	if r.Due() || r.CreatedToday() {
 		fmt.Println("is due :)")
-		// r.Review()
+		// r.Review(os.Stdout)
 	} else {
 		fmt.Printf("You review is not due until %v. See you then!", r.NextDueDate())
 	}

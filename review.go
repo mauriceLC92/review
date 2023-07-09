@@ -31,6 +31,8 @@ const (
 	DAY_MONTH_YEAR_FORMAT string = "02-01-2006"
 )
 
+var Now = time.Now
+
 type QuestionType string
 
 type Question struct {
@@ -171,7 +173,9 @@ func (mr MyReview) NextDueDate() time.Time {
 // the lastest review
 func Check(reviews []MyReview) (MyReview, bool) {
 	if len(reviews) == 0 {
-		return MyReview{}, false
+		return MyReview{
+			CreatedAt: Now(),
+		}, false
 	}
 	sort.Slice(reviews, func(i, j int) bool { return reviews[i].CreatedAt.After(reviews[j].CreatedAt) })
 	latestReview := reviews[0]

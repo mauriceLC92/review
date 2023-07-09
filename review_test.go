@@ -316,10 +316,16 @@ func TestNextDueDateReturnsTheNextDueDate(t *testing.T) {
 
 func TestCheckDeterminesIfNoReviewsHaveTakenPlace(t *testing.T) {
 	t.Parallel()
+	testTime := time.Now()
 
+	review.Now = func() time.Time {
+		return testTime
+	}
 	reviews := []review.MyReview{}
 
-	want := review.MyReview{}
+	want := review.MyReview{
+		CreatedAt: testTime,
+	}
 	got, ok := review.Check(reviews)
 
 	if ok != false {
