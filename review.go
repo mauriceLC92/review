@@ -44,9 +44,7 @@ type Schedule string
 // ---------------------------------------------------------------------------
 
 func AskTo(w io.Writer, r io.Reader, question string) string {
-	// TODO - add this instead and fix failing test
-	// fmt.Fprint(w, fmt.Sprintln(question))
-	fmt.Fprint(w, question)
+	fmt.Fprint(w, fmt.Sprintln(question))
 	var scanner = bufio.NewScanner(r)
 	scanner.Scan()
 	return scanner.Text()

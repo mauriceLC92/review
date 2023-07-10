@@ -31,7 +31,7 @@ func TestAskPrintsGivenQuestionAndReturnsAnswer(t *testing.T) {
 	got := review.AskTo(buf, userInput, question)
 
 	bufString := buf.String()
-	if bufString != question {
+	if bufString != fmt.Sprintln(question) {
 		t.Errorf("Wanted %q but got %q", question, bufString)
 	}
 
