@@ -3,7 +3,6 @@ package review
 import (
 	"bufio"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -40,63 +39,7 @@ var DefaultQuestions = []MyQuestion{
 
 type QuestionType string
 
-type Question struct {
-	ID          string
-	Title       string
-	Description string
-	Answer      string
-	Type        QuestionType
-}
-
-type Questions []Question
-
-func (qs Questions) AllComplete() (bool, error) {
-	if len(qs) == 0 {
-		return false, errors.New("no questions provided")
-	}
-	var complete = true
-	for _, q := range qs {
-		if q.Answer == "" {
-			complete = false
-		}
-	}
-	return complete, nil
-}
-
 type Schedule string
-
-type Review struct {
-	ID        string
-	CreatedAt int64 // unix timestamp
-	UpdatedAt int64 // unix timestamp
-	Complete  bool
-	Questions Questions
-	Schedule
-}
-
-// review create
-func Create(r Review) Review {
-	return Review{
-		ID:        r.ID,
-		CreatedAt: r.CreatedAt,
-		UpdatedAt: r.UpdatedAt,
-		Complete:  false,
-		Questions: r.Questions,
-		Schedule:  r.Schedule,
-	}
-}
-
-func (r *Review) Finish() error {
-	questions := r.Questions
-	complete, err := questions.AllComplete()
-	if err != nil {
-		return err
-	}
-	if complete {
-		r.Complete = true
-	}
-	return nil
-}
 
 // ---------------------------------------------------------------------------
 
