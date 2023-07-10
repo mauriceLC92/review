@@ -265,3 +265,34 @@ func TestSaveWillSaveAReview(t *testing.T) {
 
 	resetFile("testdata/reviews-save.json")
 }
+
+func TestAnsweredChecksIfAnyQuestionWasAnswered(t *testing.T) {
+	t.Parallel()
+
+	want := true
+	r := review.MyReview{
+		CreatedAt: time.Date(2025, time.July, 9, 0, 0, 0, 0, time.UTC),
+		Questions: []review.MyQuestion{
+			{Title: "How are you today?", Answer: "Fantastic"},
+			{Title: "What was your biggest win this month?", Answer: "Writing this test"},
+		},
+	}
+
+	got := r.Answered()
+	if want != got {
+		t.Errorf("wanted %v but got %v", want, got)
+	}
+
+	want = false
+	r = review.MyReview{
+		CreatedAt: time.Date(2025, time.July, 9, 0, 0, 0, 0, time.UTC),
+		Questions: []review.MyQuestion{
+			{Title: "How are you today?", Answer: ""},
+			{Title: "What was your biggest win this month?", Answer: ""},
+		},
+	}
+	got = r.Answered()
+	if want != got {
+		t.Errorf("wanted %v but got %v", want, got)
+	}
+}

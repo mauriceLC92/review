@@ -45,7 +45,7 @@ func runReview() {
 	if !ok {
 		fmt.Println("You have not done a review yet! Let's get you started")
 	}
-	if r.Due() || r.CreatedToday() {
+	if (r.Due() && !r.Answered()) || (r.CreatedToday() && !r.Answered()) {
 		r.Review(os.Stdout, os.Stdin)
 		review.SaveTo(r, "reviews.json")
 		// save the review to the file `reviews.json`

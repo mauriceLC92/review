@@ -103,6 +103,17 @@ func (mr *MyReview) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 }
 
+func (mr MyReview) Answered() bool {
+	var answered bool
+	for _, q := range mr.Questions {
+		if len(q.Answer) > 0 {
+			answered = true
+			break
+		}
+	}
+	return answered
+}
+
 func (mr MyReview) Due() bool {
 	currentTime := time.Now()
 	oneMonthLater := mr.CreatedAt.AddDate(0, 1, 0)
