@@ -2,6 +2,8 @@ package review_test
 
 import (
 	"bytes"
+	"fmt"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -9,6 +11,13 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/mauriceLC92/review"
 )
+
+func resetFile(filePath string) {
+	err := os.WriteFile(filePath, []byte("[]"), 0644)
+	if err != nil {
+		fmt.Printf("error resetting file: %v\n", err)
+	}
+}
 
 func TestReview(t *testing.T) {
 	t.Parallel()
@@ -217,11 +226,11 @@ func TestAskPrintsGivenQuestionAndReturnsAnswer(t *testing.T) {
 
 	bufString := buf.String()
 	if bufString != question {
-		t.Errorf("Wanted %s but got %s", question, bufString)
+		t.Errorf("Wanted %q but got %q", question, bufString)
 	}
 
 	if userInputStr != got {
-		t.Errorf("Wanted %s but got %v", userInputStr, got)
+		t.Errorf("Wanted %q but got %q", userInputStr, got)
 	}
 }
 
@@ -325,6 +334,7 @@ func TestCheckDeterminesIfNoReviewsHaveTakenPlace(t *testing.T) {
 
 	want := review.MyReview{
 		CreatedAt: testTime,
+		Questions: review.DefaultQuestions,
 	}
 	got, ok := review.Check(reviews)
 
@@ -419,4 +429,33 @@ func TestReviewAsksQuestionsAndGetsAnswers(t *testing.T) {
 	if !cmp.Equal(rev, wantedReview) {
 		t.Error(cmp.Diff(wantedReview, r))
 	}
+}
+
+func TestSaveWillSaveAReview(t *testing.T) {
+	t.Parallel()
+
+	r := review.MyReview{
+		CreatedAt: time.Date(2025, time.July, 9, 0, 0, 0, 0, time.UTC),
+		Questions: []review.MyQuestion{
+			{Title: "How are you today?", Answer: "Fantastic"},
+			{Title: "What was your biggest win this month?", Answer: "Writing this test"},
+		},
+	}
+
+	err := review.SaveTo(r, "testdata/reviews-save.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	reviews, err := review.Parse("testdata/reviews-save.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got := reviews[0]
+	if !cmp.Equal(got, r) {
+		t.Error(cmp.Diff(got, r))
+	}
+
+	resetFile("testdata/reviews-save.json")
 }

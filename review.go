@@ -33,6 +33,11 @@ const (
 
 var Now = time.Now
 
+var DefaultQuestions = []MyQuestion{
+	{Title: "How are you today?", Answer: ""},
+	{Title: "What was your biggest win this month?", Answer: ""},
+}
+
 type QuestionType string
 
 type Question struct {
@@ -96,6 +101,8 @@ func (r *Review) Finish() error {
 // ---------------------------------------------------------------------------
 
 func AskTo(w io.Writer, r io.Reader, question string) string {
+	// TODO - add this instead and fix failing test
+	// fmt.Fprint(w, fmt.Sprintln(question))
 	fmt.Fprint(w, question)
 	var scanner = bufio.NewScanner(r)
 	scanner.Scan()
@@ -142,9 +149,11 @@ func (mr *MyReview) MarshalJSON() ([]byte, error) {
 
 	// Create a new struct that has the same fields as MyReview but with CreatedAt as a string.
 	aux := &struct {
-		CreatedAt string `json:"createdAt"`
+		CreatedAt string       `json:"createdAt"`
+		Questions []MyQuestion `json:"questions"`
 	}{
 		CreatedAt: formattedDate,
+		Questions: mr.Questions,
 	}
 
 	// Marshal the auxiliary struct into JSON.
@@ -175,6 +184,7 @@ func Check(reviews []MyReview) (MyReview, bool) {
 	if len(reviews) == 0 {
 		return MyReview{
 			CreatedAt: Now(),
+			Questions: DefaultQuestions,
 		}, false
 	}
 	sort.Slice(reviews, func(i, j int) bool { return reviews[i].CreatedAt.After(reviews[j].CreatedAt) })
@@ -199,4 +209,24 @@ func (mr *MyReview) Review(w io.Writer, r io.Reader) {
 		ans := AskTo(w, r, q.Title)
 		mr.Questions[i].Answer = ans
 	}
+}
+
+func SaveTo(mr MyReview, filePath string) error {
+	reviews, err := Parse(filePath)
+	if err != nil {
+		return err
+	}
+
+	latestReviews := append(reviews, mr)
+	jsonData, err := json.MarshalIndent(latestReviews, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filePath, jsonData, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -46,8 +46,15 @@ func runReview() {
 		fmt.Println("You have not done a review yet! Let's get you started")
 	}
 	if r.Due() || r.CreatedToday() {
-		fmt.Println("is due :)")
-		// r.Review(os.Stdout)
+		r.Review(os.Stdout, os.Stdin)
+		review.SaveTo(r, "reviews.json")
+		// save the review to the file `reviews.json`
+		// - do we now need to think about some file store?
+		// Save(mr MyReview)
+		// - inside this we can marshall it and then call some to file which writes json to a file
+		// - probaly need to get all the current reviews and append this one to it and then marshall back to JSON
+
+		fmt.Printf("Thanks for the review! See you on %v for the next one!", r.NextDueDate())
 	} else {
 		fmt.Printf("You review is not due until %v. See you then!", r.NextDueDate())
 	}
