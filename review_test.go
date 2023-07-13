@@ -296,3 +296,23 @@ func TestAnsweredChecksIfAnyQuestionWasAnswered(t *testing.T) {
 		t.Errorf("wanted %v but got %v", want, got)
 	}
 }
+
+func TestOpenJSONStoreOpensFileAndReturnsJSONStore(t *testing.T) {
+	t.Parallel()
+
+	want := []review.MyReview{
+		{
+			CreatedAt: time.Date(2025, time.July, 9, 0, 0, 0, 0, time.UTC),
+		},
+	}
+
+	store, err := review.OpenJSONStore("testdata/reviews-json-store.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	reviews := store.GetAll()
+	if !cmp.Equal(want, reviews) {
+		t.Error(cmp.Diff(want, reviews))
+	}
+}

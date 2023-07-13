@@ -10,14 +10,6 @@ import (
 	"time"
 )
 
-/**
-	1. As a user I would like to create a review to review on a pre-determined schedule. Monthly, weekly is fine for now
-	2. As a user I should be able to complete a review
-		- what does this entail?
-			- fill out each question in the review
-	3. As a user I should be able to view my past reviews
-**/
-
 const (
 	// Review schedules
 	MONTHLY Schedule = "monthly"
@@ -40,8 +32,6 @@ var DefaultQuestions = []MyQuestion{
 type QuestionType string
 
 type Schedule string
-
-// ---------------------------------------------------------------------------
 
 func AskTo(w io.Writer, r io.Reader, question string) string {
 	fmt.Fprint(w, fmt.Sprintln(question))
@@ -182,3 +172,24 @@ func SaveTo(mr MyReview, filePath string) error {
 
 	return nil
 }
+
+type JSONStore struct {
+	reviews []MyReview
+}
+
+func (js JSONStore) GetAll() []MyReview {
+	return js.reviews
+}
+
+func OpenJSONStore(filePath string) (*JSONStore, error) {
+	reviews, err := Parse(filePath)
+	if err != nil {
+		return nil, err
+	}
+	return &JSONStore{
+		reviews: reviews,
+	}, nil
+}
+
+// todo - flesh out the JSONStore
+// todo - add a PostgresStore
