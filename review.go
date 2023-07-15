@@ -10,14 +10,6 @@ import (
 	"time"
 )
 
-/**
-	1. As a user I would like to create a review to review on a pre-determined schedule. Monthly, weekly is fine for now
-	2. As a user I should be able to complete a review
-		- what does this entail?
-			- fill out each question in the review
-	3. As a user I should be able to view my past reviews
-**/
-
 const (
 	// Review schedules
 	MONTHLY Schedule = "monthly"
@@ -41,8 +33,6 @@ type QuestionType string
 
 type Schedule string
 
-// ---------------------------------------------------------------------------
-
 func AskTo(w io.Writer, r io.Reader, question string) string {
 	fmt.Fprint(w, fmt.Sprintln(question))
 	var scanner = bufio.NewScanner(r)
@@ -60,9 +50,9 @@ type MyReview struct {
 	Questions []MyQuestion `json:"questions"`
 }
 
+// UnmarshalJSON allows you to unmarshall custom date formats from JSON
 // The overall effect of this method is that it allows the createdAt field in the JSON data, which is in the format "day-month-year",
 // to be correctly parsed into a time.Time value in the MyReview structure.
-// chatGPT generated example for being able to unmarshall custom date formats from JSON
 func (mr *MyReview) UnmarshalJSON(input []byte) error {
 	type Alias MyReview
 	aux := &struct {
@@ -112,12 +102,14 @@ func (mr MyReview) Answered() bool {
 	return answered
 }
 
+// Due will check if a review is due
 func (mr MyReview) Due() bool {
 	currentTime := time.Now()
 	oneMonthLater := mr.CreatedAt.AddDate(0, 1, 0)
 	return currentTime.After(oneMonthLater)
 }
 
+// CreatedToday will check if a review was created today
 func (mr MyReview) CreatedToday() bool {
 	currentTime := time.Now()
 	sameMonth := currentTime.Month() == mr.CreatedAt.Month()
@@ -126,6 +118,7 @@ func (mr MyReview) CreatedToday() bool {
 	return sameYear && sameDay && sameMonth
 }
 
+// NextDueDate will return the next date that a review is due
 func (mr MyReview) NextDueDate() time.Time {
 	return mr.CreatedAt.AddDate(0, 1, 0)
 }
@@ -144,6 +137,8 @@ func Check(reviews []MyReview) (MyReview, bool) {
 	return latestReview, true
 }
 
+// Parse reads data from the filePath provided and attempts to return a slice of reviews if they exist.
+// if none exist, an empty slice of reviews is returned instead.
 func Parse(path string) ([]MyReview, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -182,3 +177,41 @@ func SaveTo(mr MyReview, filePath string) error {
 
 	return nil
 }
+
+type JSONStore struct {
+	filePath string
+	reviews  []MyReview
+}
+
+// OpenJSONStore will attempt to open the provided JSON file and return the reviews it contains.
+func OpenJSONStore(filePath string) (*JSONStore, error) {
+	reviews, err := Parse(filePath)
+	if err != nil {
+		return nil, err
+	}
+	return &JSONStore{
+		reviews:  reviews,
+		filePath: filePath,
+	}, nil
+}
+
+// GetAll will return all the reviews from a JSONStore
+func (js JSONStore) GetAll() []MyReview {
+	return js.reviews
+}
+
+// GetLatestReview will return the lastest review from a JSONStore
+func (js JSONStore) GetLatestReview() (MyReview, bool) {
+	return Check(js.reviews)
+}
+
+// GetLatestReview will save a review to the JSONStore
+func (js JSONStore) Save(r MyReview) error {
+	err := SaveTo(r, js.filePath)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// todo - add a PostgresStore

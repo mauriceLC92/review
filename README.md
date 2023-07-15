@@ -9,3 +9,5 @@ The `review` package provides an easy and intuitive way to do monthly reviews. E
 ## Usage
 
 ## License
+
+This package is licensed under the MIT License - see the LICENSE file for details.

@@ -36,18 +36,21 @@ func askQuestions(questions []string) {
 }
 
 func runReview() {
-	reviews, err := review.Parse("reviews.json")
+	store, err := review.OpenJSONStore("reviews.json")
+	// reviews, err := review.Parse("reviews.json")
 	if err != nil {
 		fmt.Println("error opening file of reviews", err)
 	}
 
-	r, ok := review.Check(reviews)
+	r, ok := store.GetLatestReview()
+	// r, ok := review.Check(reviews)
 	if !ok {
 		fmt.Println("You have not done a review yet! Let's get you started")
 	}
 	if (r.Due() && !r.Answered()) || (r.CreatedToday() && !r.Answered()) {
 		r.Review(os.Stdout, os.Stdin)
 		review.SaveTo(r, "reviews.json")
+		// store.Save(r)
 		// save the review to the file `reviews.json`
 		// - do we now need to think about some file store?
 		// Save(mr MyReview)

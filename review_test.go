@@ -296,3 +296,73 @@ func TestAnsweredChecksIfAnyQuestionWasAnswered(t *testing.T) {
 		t.Errorf("wanted %v but got %v", want, got)
 	}
 }
+
+func TestOpenJSONStoreOpensFileAndReturnsJSONStore(t *testing.T) {
+	t.Parallel()
+
+	want := []review.MyReview{
+		{
+			CreatedAt: time.Date(2025, time.July, 9, 0, 0, 0, 0, time.UTC),
+		},
+	}
+
+	store, err := review.OpenJSONStore("testdata/reviews-json-store.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	reviews := store.GetAll()
+	if !cmp.Equal(want, reviews) {
+		t.Error(cmp.Diff(want, reviews))
+	}
+}
+
+func TestGetLatestReviewFetchesTheLatestReviewFromJSONStore(t *testing.T) {
+	t.Parallel()
+
+	want := review.MyReview{
+		CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC),
+	}
+
+	store, err := review.OpenJSONStore("testdata/reviews-json-store-latest-review.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got, ok := store.GetLatestReview()
+	if ok != true {
+		t.Error("expected 'true' when a review has taken place but got 'false'")
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func TestSaveWillSaveAReviewToTheJSONStore(t *testing.T) {
+	t.Parallel()
+
+	store, err := review.OpenJSONStore("testdata/reviews-json-store-save.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := review.MyReview{
+		CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC),
+	}
+
+	err = store.Save(want)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	store, err = review.OpenJSONStore("testdata/reviews-json-store-save.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	reviews := store.GetAll()
+	got := reviews[0]
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
