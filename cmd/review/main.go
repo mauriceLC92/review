@@ -49,8 +49,8 @@ func runReview() {
 	}
 	if (r.Due() && !r.Answered()) || (r.CreatedToday() && !r.Answered()) {
 		r.Review(os.Stdout, os.Stdin)
-		// review.SaveTo(r, "reviews.json")
-		store.Save(r)
+		review.SaveTo(r, "reviews.json")
+		// store.Save(r)
 		// save the review to the file `reviews.json`
 		// - do we now need to think about some file store?
 		// Save(mr MyReview)
