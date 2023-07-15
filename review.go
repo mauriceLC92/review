@@ -24,7 +24,7 @@ const (
 
 var Now = time.Now
 
-var DefaultQuestions = []MyQuestion{
+var DefaultQuestions = []Question{
 	{Title: "How are you today?", Answer: ""},
 	{Title: "What was your biggest win this month?", Answer: ""},
 }
@@ -40,21 +40,21 @@ func AskTo(w io.Writer, r io.Reader, question string) string {
 	return scanner.Text()
 }
 
-type MyQuestion struct {
+type Question struct {
 	Title  string `json:"title"`
 	Answer string `json:"answer"`
 }
 
-type MyReview struct {
-	CreatedAt time.Time    `json:"createdAt"`
-	Questions []MyQuestion `json:"questions"`
+type Review struct {
+	CreatedAt time.Time  `json:"createdAt"`
+	Questions []Question `json:"questions"`
 }
 
 // UnmarshalJSON allows you to unmarshall custom date formats from JSON
 // The overall effect of this method is that it allows the createdAt field in the JSON data, which is in the format "day-month-year",
-// to be correctly parsed into a time.Time value in the MyReview structure.
-func (mr *MyReview) UnmarshalJSON(input []byte) error {
-	type Alias MyReview
+// to be correctly parsed into a time.Time value in the Review structure.
+func (mr *Review) UnmarshalJSON(input []byte) error {
+	type Alias Review
 	aux := &struct {
 		CreatedAt string `json:"createdAt"`
 		*Alias
@@ -74,14 +74,14 @@ func (mr *MyReview) UnmarshalJSON(input []byte) error {
 
 // MarshalJSON is similar to UnmarshalJSON in that it helps format the time into the desired
 // format we want used in the JSON.
-func (mr *MyReview) MarshalJSON() ([]byte, error) {
+func (mr *Review) MarshalJSON() ([]byte, error) {
 	// Format the CreatedAt field as a string in the desired format.
 	formattedDate := mr.CreatedAt.Format(DAY_MONTH_YEAR_FORMAT)
 
-	// Create a new struct that has the same fields as MyReview but with CreatedAt as a string.
+	// Create a new struct that has the same fields as Review but with CreatedAt as a string.
 	aux := &struct {
-		CreatedAt string       `json:"createdAt"`
-		Questions []MyQuestion `json:"questions"`
+		CreatedAt string     `json:"createdAt"`
+		Questions []Question `json:"questions"`
 	}{
 		CreatedAt: formattedDate,
 		Questions: mr.Questions,
@@ -91,7 +91,7 @@ func (mr *MyReview) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 }
 
-func (mr MyReview) Answered() bool {
+func (mr Review) Answered() bool {
 	var answered bool
 	for _, q := range mr.Questions {
 		if len(q.Answer) > 0 {
@@ -103,14 +103,14 @@ func (mr MyReview) Answered() bool {
 }
 
 // Due will check if a review is due
-func (mr MyReview) Due() bool {
+func (mr Review) Due() bool {
 	currentTime := time.Now()
 	oneMonthLater := mr.CreatedAt.AddDate(0, 1, 0)
 	return currentTime.After(oneMonthLater)
 }
 
 // CreatedToday will check if a review was created today
-func (mr MyReview) CreatedToday() bool {
+func (mr Review) CreatedToday() bool {
 	currentTime := time.Now()
 	sameMonth := currentTime.Month() == mr.CreatedAt.Month()
 	sameDay := currentTime.Day() == mr.CreatedAt.Day()
@@ -119,15 +119,15 @@ func (mr MyReview) CreatedToday() bool {
 }
 
 // NextDueDate will return the next date that a review is due
-func (mr MyReview) NextDueDate() time.Time {
+func (mr Review) NextDueDate() time.Time {
 	return mr.CreatedAt.AddDate(0, 1, 0)
 }
 
 // Check will check if any review has been done and if so, will return
 // the lastest review
-func Check(reviews []MyReview) (MyReview, bool) {
+func Check(reviews []Review) (Review, bool) {
 	if len(reviews) == 0 {
-		return MyReview{
+		return Review{
 			CreatedAt: Now(),
 			Questions: DefaultQuestions,
 		}, false
@@ -139,26 +139,26 @@ func Check(reviews []MyReview) (MyReview, bool) {
 
 // Parse reads data from the filePath provided and attempts to return a slice of reviews if they exist.
 // if none exist, an empty slice of reviews is returned instead.
-func Parse(path string) ([]MyReview, error) {
+func Parse(path string) ([]Review, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return []MyReview{}, err
+		return []Review{}, err
 	}
-	reviews := []MyReview{}
+	reviews := []Review{}
 	if err := json.Unmarshal(data, &reviews); err != nil {
-		return []MyReview{}, err
+		return []Review{}, err
 	}
 	return reviews, nil
 }
 
-func (mr *MyReview) Review(w io.Writer, r io.Reader) {
+func (mr *Review) Review(w io.Writer, r io.Reader) {
 	for i, q := range mr.Questions {
 		ans := AskTo(w, r, q.Title)
 		mr.Questions[i].Answer = ans
 	}
 }
 
-func SaveTo(mr MyReview, filePath string) error {
+func SaveTo(mr Review, filePath string) error {
 	reviews, err := Parse(filePath)
 	if err != nil {
 		return err
@@ -180,7 +180,7 @@ func SaveTo(mr MyReview, filePath string) error {
 
 type JSONStore struct {
 	filePath string
-	reviews  []MyReview
+	reviews  []Review
 }
 
 // OpenJSONStore will attempt to open the provided JSON file and return the reviews it contains.
@@ -196,17 +196,17 @@ func OpenJSONStore(filePath string) (*JSONStore, error) {
 }
 
 // GetAll will return all the reviews from a JSONStore
-func (js JSONStore) GetAll() []MyReview {
+func (js JSONStore) GetAll() []Review {
 	return js.reviews
 }
 
 // GetLatestReview will return the lastest review from a JSONStore
-func (js JSONStore) GetLatestReview() (MyReview, bool) {
+func (js JSONStore) GetLatestReview() (Review, bool) {
 	return Check(js.reviews)
 }
 
 // GetLatestReview will save a review to the JSONStore
-func (js JSONStore) Save(r MyReview) error {
+func (js JSONStore) Save(r Review) error {
 	err := SaveTo(r, js.filePath)
 	if err != nil {
 		return err

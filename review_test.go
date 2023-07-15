@@ -40,10 +40,10 @@ func TestAskPrintsGivenQuestionAndReturnsAnswer(t *testing.T) {
 	}
 }
 
-func TestMyReview(t *testing.T) {
+func TestReview(t *testing.T) {
 	t.Parallel()
 	currentDate := time.Now()
-	_ = review.MyReview{
+	_ = review.Review{
 		CreatedAt: currentDate,
 	}
 }
@@ -53,7 +53,7 @@ func TestDueChecksDueDateAndReturnsTrueIfDue(t *testing.T) {
 
 	testDate := "20-05-2023"
 	myTime, _ := time.Parse(review.DAY_MONTH_YEAR_FORMAT, testDate)
-	myReview := review.MyReview{
+	myReview := review.Review{
 		CreatedAt: myTime,
 	}
 
@@ -70,7 +70,7 @@ func TestDueChecksDueDateAndReturnsFalseIfNotDue(t *testing.T) {
 
 	testDate := "20-06-2025"
 	myTime, _ := time.Parse(review.DAY_MONTH_YEAR_FORMAT, testDate)
-	myReview := review.MyReview{
+	myReview := review.Review{
 		CreatedAt: myTime,
 	}
 
@@ -85,7 +85,7 @@ func TestDueChecksDueDateAndReturnsFalseIfNotDue(t *testing.T) {
 func TestCreatedTodayChecksIfAReviewWasCreatedTodayAndReturnsTrue(t *testing.T) {
 	t.Parallel()
 
-	r := review.MyReview{
+	r := review.Review{
 		CreatedAt: time.Now(),
 	}
 
@@ -100,7 +100,7 @@ func TestCreatedTodayChecksIfAReviewWasCreatedTodayAndReturnsTrue(t *testing.T) 
 func TestCreatedTodayChecksIfAReviewWasCreatedTodayAndReturnsFalse(t *testing.T) {
 	t.Parallel()
 
-	r := review.MyReview{
+	r := review.Review{
 		CreatedAt: time.Now().AddDate(5, 0, 1),
 	}
 
@@ -117,7 +117,7 @@ func TestNextDueDateReturnsTheNextDueDate(t *testing.T) {
 
 	testDate := "20-05-2023"
 	myTime, _ := time.Parse(review.DAY_MONTH_YEAR_FORMAT, testDate)
-	myReview := review.MyReview{
+	myReview := review.Review{
 		CreatedAt: myTime,
 	}
 
@@ -136,9 +136,9 @@ func TestCheckDeterminesIfNoReviewsHaveTakenPlace(t *testing.T) {
 	review.Now = func() time.Time {
 		return testTime
 	}
-	reviews := []review.MyReview{}
+	reviews := []review.Review{}
 
-	want := review.MyReview{
+	want := review.Review{
 		CreatedAt: testTime,
 		Questions: review.DefaultQuestions,
 	}
@@ -156,12 +156,12 @@ func TestCheckDeterminesIfNoReviewsHaveTakenPlace(t *testing.T) {
 func TestCheckDeterminesIfAReviewHasTakenPlaceAndReturnsLatestReview(t *testing.T) {
 	t.Parallel()
 
-	reviews := []review.MyReview{
+	reviews := []review.Review{
 		{CreatedAt: time.Date(2025, time.June, 20, 0, 0, 0, 0, time.UTC)},
 		{CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC)},
 		{CreatedAt: time.Date(2025, time.July, 20, 0, 0, 0, 0, time.UTC)},
 	}
-	want := review.MyReview{
+	want := review.Review{
 		CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC),
 	}
 	got, ok := review.Check(reviews)
@@ -178,7 +178,7 @@ func TestCheckDeterminesIfAReviewHasTakenPlaceAndReturnsLatestReview(t *testing.
 func TestParseReadsJSONFileOfReviewsAndReturnsASliceOfReviews(t *testing.T) {
 	t.Parallel()
 
-	wantedReviews := []review.MyReview{
+	wantedReviews := []review.Review{
 		{CreatedAt: time.Date(2025, time.June, 20, 0, 0, 0, 0, time.UTC)},
 		{CreatedAt: time.Date(2025, time.July, 20, 0, 0, 0, 0, time.UTC)},
 		{CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC)},
@@ -215,17 +215,17 @@ func TestParseReadsJSONFileOfReviewsAndErrorsParsingInvalidJSON(t *testing.T) {
 func TestReviewAsksQuestionsAndGetsAnswers(t *testing.T) {
 	t.Parallel()
 	buf := new(bytes.Buffer)
-	r := &review.MyReview{
+	r := &review.Review{
 		CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC),
-		Questions: []review.MyQuestion{
+		Questions: []review.Question{
 			{Title: "What could you have done better last month?", Answer: ""},
 		},
 	}
 
 	userAnswer := "Read 100 more pages of AWS Fundamentals"
-	wantedReview := review.MyReview{
+	wantedReview := review.Review{
 		CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC),
-		Questions: []review.MyQuestion{
+		Questions: []review.Question{
 			{Title: "What could you have done better last month?", Answer: userAnswer},
 		},
 	}
@@ -240,9 +240,9 @@ func TestReviewAsksQuestionsAndGetsAnswers(t *testing.T) {
 func TestSaveWillSaveAReview(t *testing.T) {
 	t.Parallel()
 
-	r := review.MyReview{
+	r := review.Review{
 		CreatedAt: time.Date(2025, time.July, 9, 0, 0, 0, 0, time.UTC),
-		Questions: []review.MyQuestion{
+		Questions: []review.Question{
 			{Title: "How are you today?", Answer: "Fantastic"},
 			{Title: "What was your biggest win this month?", Answer: "Writing this test"},
 		},
@@ -270,9 +270,9 @@ func TestAnsweredChecksIfAnyQuestionWasAnswered(t *testing.T) {
 	t.Parallel()
 
 	want := true
-	r := review.MyReview{
+	r := review.Review{
 		CreatedAt: time.Date(2025, time.July, 9, 0, 0, 0, 0, time.UTC),
-		Questions: []review.MyQuestion{
+		Questions: []review.Question{
 			{Title: "How are you today?", Answer: "Fantastic"},
 			{Title: "What was your biggest win this month?", Answer: "Writing this test"},
 		},
@@ -284,9 +284,9 @@ func TestAnsweredChecksIfAnyQuestionWasAnswered(t *testing.T) {
 	}
 
 	want = false
-	r = review.MyReview{
+	r = review.Review{
 		CreatedAt: time.Date(2025, time.July, 9, 0, 0, 0, 0, time.UTC),
-		Questions: []review.MyQuestion{
+		Questions: []review.Question{
 			{Title: "How are you today?", Answer: ""},
 			{Title: "What was your biggest win this month?", Answer: ""},
 		},
@@ -300,7 +300,7 @@ func TestAnsweredChecksIfAnyQuestionWasAnswered(t *testing.T) {
 func TestOpenJSONStoreOpensFileAndReturnsJSONStore(t *testing.T) {
 	t.Parallel()
 
-	want := []review.MyReview{
+	want := []review.Review{
 		{
 			CreatedAt: time.Date(2025, time.July, 9, 0, 0, 0, 0, time.UTC),
 		},
@@ -320,7 +320,7 @@ func TestOpenJSONStoreOpensFileAndReturnsJSONStore(t *testing.T) {
 func TestGetLatestReviewFetchesTheLatestReviewFromJSONStore(t *testing.T) {
 	t.Parallel()
 
-	want := review.MyReview{
+	want := review.Review{
 		CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC),
 	}
 
@@ -346,7 +346,7 @@ func TestSaveWillSaveAReviewToTheJSONStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := review.MyReview{
+	want := review.Review{
 		CreatedAt: time.Date(2025, time.August, 20, 0, 0, 0, 0, time.UTC),
 	}
 
