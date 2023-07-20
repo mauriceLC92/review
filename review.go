@@ -213,5 +213,3 @@ func (js JSONStore) Save(r Review) error {
 	}
 	return nil
 }
-
-// todo - add a PostgresStore

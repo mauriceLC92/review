@@ -12,8 +12,12 @@ import (
 	"github.com/mauriceLC92/review"
 )
 
-func resetFile(filePath string) {
-	err := os.WriteFile(filePath, []byte("[]"), 0644)
+func resetFile(filePath, data string) {
+	var fileData = "[]"
+	if data != "" {
+		fileData = data
+	}
+	err := os.WriteFile(filePath, []byte(fileData), 0644)
 	if err != nil {
 		fmt.Printf("error resetting file: %v\n", err)
 	}
@@ -263,7 +267,7 @@ func TestSaveWillSaveAReview(t *testing.T) {
 		t.Error(cmp.Diff(got, r))
 	}
 
-	resetFile("testdata/reviews-save.json")
+	resetFile("testdata/reviews-save.json", "")
 }
 
 func TestAnsweredChecksIfAnyQuestionWasAnswered(t *testing.T) {
@@ -365,4 +369,26 @@ func TestSaveWillSaveAReviewToTheJSONStore(t *testing.T) {
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
 	}
+
+	resetFile("testdata/reviews-json-store-save.json", "")
 }
+
+// func TestOpenPostgresStoreOpensConnectionToDatabaseAndReturnsPostgresStore(t *testing.T) {
+// 	t.Parallel()
+
+// 	want := []review.Review{
+// 		{
+// 			CreatedAt: time.Date(2025, time.July, 9, 0, 0, 0, 0, time.UTC),
+// 		},
+// 	}
+
+// 	store, err := review.OpenPostgresStore("some-connection-string")
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+
+// 	reviews := store.GetAll()
+// 	if !cmp.Equal(want, reviews) {
+// 		t.Error(cmp.Diff(want, reviews))
+// 	}
+// }
