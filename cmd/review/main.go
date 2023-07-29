@@ -40,7 +40,7 @@ func runReview() {
 		review.SaveTo(r, "reviews.json")
 		fmt.Printf("Thanks for the review! See you on %v for the next one!", r.NextDueDate())
 	} else {
-		fmt.Printf("You review is not due until %v. See you then!", r.NextDueDate())
+		fmt.Printf("You review is not due until %v. See you then! \n", r.NextDueDate())
 	}
 }
 
@@ -50,5 +50,7 @@ func listReviews() {
 		fmt.Println("error opening file of reviews", err)
 	}
 	reviews := store.GetAll()
-	fmt.Printf("reviews: %v\n", reviews)
+	for _, r := range reviews {
+		fmt.Println(r)
+	}
 }

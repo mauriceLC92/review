@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -48,6 +49,18 @@ type Question struct {
 type Review struct {
 	CreatedAt time.Time  `json:"createdAt"`
 	Questions []Question `json:"questions"`
+}
+
+func (q Question) String() string {
+	return fmt.Sprintf("Title: %s\nAnswer: %s\n----------------------------------------------------", q.Title, q.Answer)
+}
+
+func (r Review) String() string {
+	var questionsStrs []string
+	for _, q := range r.Questions {
+		questionsStrs = append(questionsStrs, q.String())
+	}
+	return fmt.Sprintf("Date: %v\nQuestions:\n%s", r.CreatedAt.Format(DAY_MONTH_YEAR_FORMAT), strings.Join(questionsStrs, "\n"))
 }
 
 // UnmarshalJSON allows you to unmarshall custom date formats from JSON
