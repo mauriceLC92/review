@@ -2,12 +2,15 @@ package review
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"sort"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -212,4 +215,22 @@ func (js JSONStore) Save(r Review) error {
 		return err
 	}
 	return nil
+}
+
+type PostgresStore struct {
+	connectionString string
+	DbPool           *pgxpool.Pool
+}
+
+func OpenPostgresStore(connString string) (*PostgresStore, error) {
+	dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
+		// os.Exit(1)
+		return nil, err
+	}
+	return &PostgresStore{
+		DbPool:           dbpool,
+		connectionString: connString,
+	}, nil
 }
