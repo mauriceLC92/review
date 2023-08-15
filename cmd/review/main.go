@@ -8,6 +8,12 @@ import (
 	"github.com/mauriceLC92/review"
 )
 
+const (
+	HELP_REVIEW = "review - Initiate a new review or check when the next is due."
+	HELP_LIST   = "list - List previous reviews which have been filled out."
+	HELP_HELP   = "help - Display the CLI commands available to you."
+)
+
 func main() {
 
 	if len(os.Args) > 1 {
@@ -16,6 +22,8 @@ func main() {
 			runReview()
 		case "list":
 			listReviews()
+		case "help":
+			generateHelpMenu()
 		default:
 			fmt.Println("command not recognised")
 		}
@@ -23,6 +31,10 @@ func main() {
 		fmt.Println("no commands given")
 	}
 
+}
+
+func generateHelpMenu() {
+	fmt.Fprint(os.Stdout, strings.Join([]string{HELP_REVIEW, HELP_LIST, HELP_HELP}, "\n"))
 }
 
 func runReview() {

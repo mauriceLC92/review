@@ -25,16 +25,45 @@ review
 ```
 
 Example output:
-TODO
+```
+You have not done a review yet! Let's get you started
 
+How are you today?
+Doing well, but the month has been super busy!
+
+What was your biggest win this month?
+Sticking to my daily hour of writing Go.
+
+Thanks for the review! See you on 2023-09-05 11:23:09.757929 +0200 SAST for the next one!
+```
+```
+You review is not due until 2023-08-13 00:00:00 +0000 UTC. See you then! 
+```
+
+List previous reviews which have been filled out.
 ```bash
 review list
 ```
 Example output:
-TODO
+```
+Date: 13-07-2023
+Questions:
+Title: How are you today?
+Answer: Great!
+----------------------------------------------------
+Title: What was your biggest win this month?
+Answer: 1 hour of Go each day
+----------------------------------------------------
+```
 
+Display the CLI commands available to you.
 ```bash
 review help
+```
+```
+review - Initiate a new review or check when the next is due.
+list - List previous reviews which have been filled out.
+help - Display the CLI commands available to you.
 ```
 ## License
 
