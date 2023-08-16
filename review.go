@@ -26,8 +26,11 @@ const (
 var Now = time.Now
 
 var DefaultQuestions = []Question{
-	{Title: "How are you today?", Answer: ""},
-	{Title: "What was your biggest win this month?", Answer: ""},
+	{Title: "What were my biggest wins?", Answer: ""},
+	{Title: "What were my biggest realizations?", Answer: ""},
+	{Title: "What areas am I most satisfied? Least satisfied?", Answer: ""},
+	{Title: "What am I going to do more of this month? Less of?", Answer: ""},
+	{Title: "What am I thinking about for the upcoming month?", Answer: ""},
 }
 
 type QuestionType string
