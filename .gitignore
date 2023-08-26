@@ -1,5 +1,6 @@
 
 notes.md
 *.ts
+.env
 
 reviews.json

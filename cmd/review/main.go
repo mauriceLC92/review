@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
+	"github.com/joho/godotenv"
 	"github.com/mauriceLC92/review"
 )
 
@@ -15,6 +17,10 @@ const (
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	if len(os.Args) > 1 {
 		switch strings.ToLower(os.Args[1]) {

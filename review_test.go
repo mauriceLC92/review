@@ -373,22 +373,11 @@ func TestSaveWillSaveAReviewToTheJSONStore(t *testing.T) {
 	resetFile("testdata/reviews-json-store-save.json", "")
 }
 
-func TestOpenPostgresStoreOpensConnectionToDatabaseAndReturnsPostgresStore(t *testing.T) {
+func TestOpenPostgresStoreFailsToOpenAConnectionToPostgres(t *testing.T) {
 	t.Parallel()
 
-	want := []review.Review{
-		{
-			CreatedAt: time.Date(2025, time.July, 9, 0, 0, 0, 0, time.UTC),
-		},
-	}
-
-	store, err := review.OpenPostgresStore("some-connection-string")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	reviews := store.GetAll()
-	if !cmp.Equal(want, reviews) {
-		t.Error(cmp.Diff(want, reviews))
+	_, err := review.OpenPostgresStore("some-connection-string")
+	if err == nil {
+		t.Fatal("expected error opening connection to postgres but instead got nil")
 	}
 }

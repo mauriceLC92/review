@@ -236,10 +236,9 @@ type PostgresStore struct {
 }
 
 func OpenPostgresStore(connString string) (*PostgresStore, error) {
-	dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
+	dbpool, err := pgxpool.New(context.Background(), connString)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
-		// os.Exit(1)
 		return nil, err
 	}
 	return &PostgresStore{
